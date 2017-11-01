@@ -1,0 +1,181 @@
+nclude <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include <string.h>
+
+struct _data {					// Define the structure (nothing is global here).
+   char *first, *middle, *last;
+   long number;
+}; 
+
+/*****************************************************/
+/* See how big the file is.                          */
+/*****************************************************/
+int SCAN(FILE *(*stream)) {			// We want to pass stream by reference (a pointer to a pointer).
+int size = 0;
+size_t chrCount;
+char *text;
+   // Open the file and make sure it was opened.
+   if ((*stream = fopen("./hw6.data", "r")) == NULL) {
+      printf("ERROR - Could not open hw6.data file.\n");
+      exit(0);
+   }
+   // Use getline to read in a full line of data/text. 
+   // This way, we don't need to guess how big each name is.
+   while (1) {
+      text = NULL;				// MUST be set to NULL!!!!
+      getline(&text, &chrCount, *stream);	// getline expects 3 pointer arguments.
+      free(text);
+      if (feof(*stream)) break;
+      size++;
+   }
+   return size;
+}
+
+/*****************************************************/
+/* Load the file.                                    */
+/*****************************************************/
+struct _data *LOAD(FILE *stream, int size) {	// Here we can just pass stream by value (we're not changing it).
+int i;
+size_t chrCount;
+char *text, *phone, *first, *middle, *last;
+struct _data *BlackBox;
+   // Allocate memory for array of struct.
+   if ((BlackBox = (struct _data*)calloc(size, sizeof(struct _data))) == NULL) {
+      printf("ERROR - Could not allocate memory.\n");
+      exit(0);
+   }
+   // Rewind the file.
+   rewind(stream);
+   // Use getline to read in ALL of the data/text.
+   for (i = 0; i < size; i++) {
+       text = NULL;				// MUST be set to NULL!!!!
+       getline(&text, &chrCount, stream);
+       first = strtok(text, " ");		// strtok extracts all characters to " ".
+       middle= strtok(NULL, " ");		// strtok extracts all characters to " ".
+       last  = strtok(NULL, " ");		// strtok extracts all characters to " ".
+       phone = strtok(NULL, "\n");		// strtok extracts all characters to "\n".
+       // Allocate memory for first name part of struct.
+       if ((BlackBox[i].first = (char*)calloc(strlen(first)+1, sizeof(char))) == NULL) {
+          printf("ERROR - Could not allocate memory.\n");
+          exit(0);
+       }
+       // Allocate memory for middle name part of struct.
+       if ((BlackBox[i].middle = (char*)calloc(strlen(middle)+1, sizeof(char))) == NULL) {
+          printf("ERROR - Could not allocate memory.\n");
+          exit(0);
+       }
+       // Allocate memory for last name part of struct.
+       if ((BlackBox[i].last = (char*)calloc(strlen(last)+1, sizeof(char))) == NULL) {
+          printf("ERROR - Could not allocate memory.\n");
+          exit(0);
+       }
+       strcpy(BlackBox[i].first, first);	// copy first name into struct.
+       strcpy(BlackBox[i].middle,  middle);	// copy last name into struct.
+       strcpy(BlackBox[i].last,  last);		// copy last name into struct.
+       BlackBox[i].number = atol(phone);	// we want number as an long integer.
+       free(text);
+   }
+   fclose(stream);
+   return BlackBox;				// Return pointer to dynamic array.
+}
+
+/*****************************************************/
+/* Search for name.                                  */
+/*****************************************************/
+void SEARCH_FIRST(struct _data *BlackBox, char *name, int size) {
+int i;
+int found = 0;
+   printf("*******************************************\n");
+   for (i = 0; i < size; i++) {
+       if (!strcmp(name, BlackBox[i].first)) {
+          printf(" * The name was found at the %d entry.\n", i);
+          found = 1;
+          break;
+       }
+   } 
+   if (found == 0) {
+      printf("* The name was NOT found.\n");
+   }
+   printf("*******************************************\n");
+}
+
+/*****************************************************/
+/* Search for name.                                  */
+/*****************************************************/
+void SEARCH_FIRST_LAST(struct _data *BlackBox, char *first, char *last, int size) {
+int i;
+int found = 0;
+   printf("*******************************************\n");
+   for (i = 0; i < size; i++) {
+       if (!strcmp(first, BlackBox[i].first) && !strcmp(last, BlackBox[i].last)) {
+          printf("* The name was found at the %d entry.\n", i);
+          found = 1;
+          break;
+       }
+   } 
+   if (found == 0) {
+      printf("* The name was NOT found.\n");
+   }
+   printf("*******************************************\n");
+}
+
+/*****************************************************/
+/* Search for name.                                  */
+/*****************************************************/
+void SEARCH_ALL(struct _data *BlackBox, char *first, char *middle, char *last, int size) {
+int i;
+int found = 0;
+   printf("*******************************************\n");
+   for (i = 0; i < size; i++) {
+       if (!strcmp(first, BlackBox[i].first) && !strcmp(middle, BlackBox[i].middle) && !strcmp(last, BlackBox[i].last)) {
+          printf("* The name was found at the %d entry.\n", i);
+          found = 1;
+          break;
+       }
+   } 
+   if (found == 0) {
+      printf("* The name was NOT found.\n");
+   }
+   printf("*******************************************\n");
+}
+
+/*****************************************************/
+/* Free memory.                                      */
+/*****************************************************/
+void FREE(struct _data *BlackBox, int size) {
+int i;
+   for (i = 0; i < size; i++) {
+       free(BlackBox[i].first);
+       free(BlackBox[i].middle);
+       free(BlackBox[i].last);
+   } 
+   free(BlackBox);
+   BlackBox = NULL;
+}
+
+/*****************************************************/
+/* Main                                              */
+/*****************************************************/
+int main(int argv, char **argc) {
+int size;
+FILE *stream;
+struct _data *BlackBox;
+    if (argv == 1) {
+       printf("*******************************************\n");
+       printf("* You must include a name to search for.  *\n");
+       printf("*******************************************\n");
+       return 0;
+    }
+    size = SCAN(&stream);
+    BlackBox = LOAD(stream, size);
+    if (argv == 2) {
+       SEARCH_FIRST(BlackBox, argc[1], size);
+    }
+    if (argv == 4) {
+       if (!strcmp("_", argc[2])) SEARCH_FIRST_LAST(BlackBox, argc[1], argc[3], size);
+                             else SEARCH_ALL(BlackBox, argc[1], argc[2], argc[3], size);
+    }
+    FREE(BlackBox, size);
+}
+

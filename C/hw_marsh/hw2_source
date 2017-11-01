@@ -1,0 +1,9 @@
+nclude <stdio.h>
+#include <stdlib.h>
+
+int main(void) {
+   system("cat american0.txt > temp.list");
+   system("cat american1.txt >> temp.list");
+   system("cat american2.txt >> temp.list");
+   system("sort temp.list > words.txt");
+}

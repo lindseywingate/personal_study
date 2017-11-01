@@ -1,0 +1,115 @@
+nclude <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+FILE *data;
+char word[50]; 
+
+
+----------------------------------------------------------
+
+// hw4.c
+
+#include "./hw4.h"
+
+int main(void) {
+int   i, j;
+int   cnt0, cnt1, cnt2, total;
+char **words;
+
+    // Determine file sizes.
+    cnt0 = foo("./american0.txt");
+    cnt1 = foo("./american1.txt");
+    cnt2 = foo("./american2.txt");
+
+    // Create dynamic array for words.
+    total = cnt0 + cnt1+ cnt2;
+    words = calloc(total, sizeof(*words));
+    for (i = 0; i < total; i++) {
+        words[i] = calloc(50, sizeof(char));
+    }
+
+    // Populate dynamic array from three files.
+    j = 0;
+    data = fopen("./american0.txt", "r");
+    for (i = 0; i < cnt0; i++) {
+       fscanf(data, "%s", words[j++]);
+    } 
+    fclose(data);
+    data = fopen("./american1.txt", "r");
+    for (i = 0; i < cnt1; i++) {
+       fscanf(data, "%s", words[j++]);
+    } 
+    fclose(data);
+    data = fopen("./american2.txt", "r");
+    for (i = 0; i < cnt2; i++) {
+       fscanf(data, "%s", words[j++]);
+    } 
+    fclose(data);
+
+    // Sort list.
+    for (i = 0; i < total; i++) {
+        for (j = 0; j < total-1; j++) {
+            if (strcmp(words[j], words[j+1]) > 0) {
+               strcpy(word, words[j+1]);
+               strcpy(words[j+1], words[j]);
+               strcpy(words[j], word);
+            }
+        }
+    }
+
+    // Save result.
+    bar("words.txt", total, words);
+
+    // Free memory.
+    for (i = 0; i < total; i++) {
+        free(words[i]);
+    }
+    free(words);
+    return 0;
+}
+
+----------------------------------------------------------
+
+// hw4-A.c
+
+#include "./hw4.h"
+
+int foo(char *filename) { 
+int cnt = 0;
+    data = fopen(filename, "r");
+    while (1) {
+       fscanf(data, "%s", word);
+       if (feof(data)) break;
+       cnt++;
+    } 
+    fclose(data);
+    return cnt;
+}
+
+----------------------------------------------------------
+
+// hw4-B.c
+
+#include "./hw4.h"
+
+void bar(char *filename, int total, char **words) {
+int i;
+    data = fopen(filename, "w");
+    for (i = 0; i < total; i++) {
+        fprintf(data, "%s\n", words[i]);
+        printf("%s\n", words[i]);
+    }
+    fclose(data);
+}
+
+----------------------------------------------------------
+
+// hw4 script
+
+gcc -c hw4-A.c
+
+gcc -c hw4-B.c
+
+gcc hw4.c hw4-A.o hw4-B.c -o hw4
+

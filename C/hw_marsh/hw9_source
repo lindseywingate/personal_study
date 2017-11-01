@@ -1,0 +1,154 @@
+/*****************************************************/
+/* HW9                                               */
+/*****************************************************/
+#include<stdlib.h> 
+#include<stdio.h> 
+#include <string.h>
+
+struct myTree { 
+   char *first;
+   char *last;
+   long number;
+   struct myTree *right, *left; 
+}; 
+
+typedef struct myTree node; 
+
+void INSERT(node *(*), node *);
+
+/*****************************************************/
+/* SCAN - To see how big the file is.                */
+/*****************************************************/
+int SCAN(FILE *(*stream)) {			// We want to pass stream by reference (a pointer to a pointer).
+int size = 0;
+size_t chrCount;
+char *text;
+   // Open the file and make sure it was opened.
+   if ((*stream = fopen("./midterm.data.test", "r")) == NULL) {
+      printf("ERROR - Could not open midterm.data file.\n");
+      exit(0);
+   }
+   // Use getline to read in a full line of data/text. 
+   while (1) {
+      text = NULL;				// MUST be set to NULL!!!!
+      getline(&text, &chrCount, *stream);	// getline expects 3 pointer arguments.
+      free(text);				// getline calls malloc, must free text!
+      if (feof(*stream)) break;
+      size++;
+   }
+   return size;
+}
+
+/*****************************************************/
+/* LOAD - Load the file.                             */
+/*****************************************************/
+void LOAD(FILE *stream, int size, node *(*root)) {	// Here we can just pass stream by value (we're not changing it).
+int i;
+size_t chrCount;
+char *text, *phone, *first, *last;
+node *current;
+   // Rewind the file.
+   rewind(stream);
+   // Read in ALL of the data/text.
+   for (i = 0; i < size; i++) {
+       // Allocate memory for struct.
+       if ((current = (node*)calloc(size, sizeof(node))) == NULL) {
+          printf("ERROR - Could not allocate memory.\n");
+          exit(0);
+       }
+       current->left = current->right = NULL; 
+       // Read file.
+       text = NULL;				// MUST be set to NULL!!!!
+       getline(&text, &chrCount, stream);
+       first = strtok(text, " ");		// strtok extracts all characters to " ".
+       last  = strtok(NULL, " ");		// strtok extracts all characters to " ".
+       phone = strtok(NULL, "\n");		// strtok extracts all characters to "\n".
+       // Allocate memory for first name part of struct.
+       if ((current->first = (char*)calloc(strlen(first)+1, sizeof(char))) == NULL) {
+          printf("ERROR - Could not allocate memory.\n");
+          exit(0);
+       }
+       // Allocate memory for last name part of struct.
+       if ((current->last = (char*)calloc(strlen(last)+1, sizeof(char))) == NULL) {
+          printf("ERROR - Could not allocate memory.\n");
+          exit(0);
+       }
+       strcpy(current->first, first);	// copy first name into struct.
+       strcpy(current->last,  last);	// copy last name into struct.
+       current->number = atol(phone);	// we want number as an long integer.
+       free(text);			// getline calls malloc!
+       // Insert into tree.
+       INSERT(&(*root), current);
+   }
+   fclose(stream);
+}
+
+/*****************************************************/
+/* INSERT - Insert into the tree.                    */
+/*****************************************************/
+void INSERT(node *(*tree), node *item) { 
+int result;
+  if (!(*tree)) { 
+     *tree = item; 
+     return; 
+  } 
+  result = strcmp(item->first, (*tree)->first);		// strcmp to compare strings (sort).
+  if (result < 0)       INSERT(&(*tree)->left, item); 
+  else if (result >= 0) INSERT(&(*tree)->right, item); 
+} 
+
+/*****************************************************/
+/* Traverse the tree.                                */
+/*****************************************************/
+void PRE_ORDER(node *tree) { 
+  printf("%s %s %ld\n",tree->first, tree->last, tree->number); 
+  if (tree->left != NULL) PRE_ORDER(tree->left); 
+  if (tree->right != NULL) PRE_ORDER(tree->right); 
+} 
+
+void IN_ORDER(node *tree) { 
+  if (tree->left != NULL) IN_ORDER(tree->left); 
+  printf("%s %s %ld\n",tree->first, tree->last, tree->number); 
+  if (tree->right != NULL) IN_ORDER(tree->right); 
+} 
+
+void POST_ORDER(node *tree) { 
+  if (tree->left != NULL) POST_ORDER(tree->left); 
+  if (tree->right != NULL) POST_ORDER(tree->right); 
+  printf("%s %s %ld\n",tree->first, tree->last, tree->number); 
+} 
+
+/*****************************************************/
+/* Free the tree.                                    */
+/*****************************************************/
+void FREE(node *tree) { 
+  if (tree->left != NULL) FREE(tree->left); 
+  if (tree->right != NULL) FREE(tree->right); 
+  free(tree);
+} 
+
+/*****************************************************/
+/* Main                                              */
+/*****************************************************/
+int main(void) {
+int size;
+FILE *stream;
+node *tree = NULL;
+    size = SCAN(&stream);
+    LOAD(stream, size, &tree);
+    system("clear"); // Clear the screen.
+    printf("\nPRE_ORDER\n");
+    printf("--------------\n");
+    PRE_ORDER(tree); 
+    printf("\nIN_ORDER\n");
+    printf("--------------\n");
+    IN_ORDER(tree); 
+    printf("\nPOST_ORDER\n");
+    printf("--------------\n");
+    POST_ORDER(tree); 
+    FREE(tree);
+    tree = NULL;
+}
+
+
+

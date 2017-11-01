@@ -1,0 +1,213 @@
+/***********************************************************/
+/* Header files.                                           */
+/***********************************************************/
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+/***********************************************************/
+/* Structure definitions.                                  */
+/***********************************************************/
+struct node {
+   int  data;
+   struct node *right;
+   struct node *left;
+};     
+
+struct trash {
+   struct node *node;
+   struct trash *next;
+};
+ 
+/****************************************/
+/* BUILD_LIST.                          */
+/****************************************/
+void BUILD_LIST(int number2Add, struct node *(*head), struct node *(*tail)) {
+int i;
+struct node *previous, *current;
+   *head = NULL;
+   *tail = NULL;
+   for (i = 0; i < number2Add; i++) { 
+       current = (struct node *)malloc(sizeof(struct node));
+       current->data = i;
+       if (i == 0) {
+          // Handle first input (special case).
+          *head          = current;
+          current->left = NULL;
+       } else {
+          // Handle remaining inputs.
+          current->left   = previous;
+          previous->right = current;
+       }
+       current->right = NULL;
+       *tail           = current;
+       previous       = current;
+   }
+   printf("\n");
+}
+
+/****************************************/
+/* DISPLAY_LIST_INORDER.                */
+/****************************************/
+void DISPLAY_LIST_INORDER(struct node *head) {
+struct node *current;
+   current = head; 
+   while (current != NULL) {
+      printf("Left to right output:\t %d\n", current->data);
+      current = current->right;
+   }
+   printf("\n");
+}
+
+/****************************************/
+/* DISPLAY_LIST_POSTORDER.              */
+/****************************************/
+void DISPLAY_LIST_POSTORDER(struct node *tail) {
+struct node *current;
+   current = tail; 
+   while (current != NULL) {
+      printf("Right to left output:\t %d\n", current->data);
+      current = current->left;
+   }
+   printf("\n");
+}
+
+/****************************************/
+/* REMOVE_FROM_LIST.                    */
+/****************************************/
+void REMOVE_FROM_LIST(int number2Delete, int number2Add, 
+                      struct node *(*head), struct node *(*tail), struct trash *(*Head)) {
+int i;
+int link2Delete;
+struct node *current;
+struct trash *Previous, *Current;
+   *Head == NULL;
+   for (i = 0; i < number2Delete; i++) {
+       // Pick a random node (payload) to delete.
+       link2Delete = (rand() % number2Add);
+       current = *head; 
+       while (current != NULL) {
+          // Look for link with target payoad.
+          if (current->data == link2Delete) {
+             // Add link to trash list.
+             Current = (struct trash *)malloc(sizeof(struct trash));
+             Current->node = current;
+             if (i == 0) {
+                // Handle first input (special case).
+                *Head          = Current;
+             } else {
+                // Handle remaining inputs.
+                Previous->next = Current;
+             }
+             Current->next = NULL;
+             Previous      = Current;
+             // Adjust links to skip over current.
+             if (current->left == NULL) {	
+                *head = current->right;	
+                if (*head != NULL) current->right->left = NULL; // Must trap case of only 1 node.
+                break;					
+             } else if (current->right == NULL) {
+                *tail = current->left;			
+                current->left->right = NULL;		
+                break;					
+             } else {		
+                current->left->right = current->right;	
+                current->right->left = current->left;
+                break;
+             }
+          } 
+          current = current->right;
+       }
+   }      
+}
+
+/****************************************/
+/* DISPLAY_TRASH.                       */
+/****************************************/
+void DISPLAY_TRASH(struct trash *head) {
+struct trash *current;
+   current = head; 
+   while (current != NULL) {
+      printf("Trash list:\t\t %d\n", current->node->data);
+      current = current->next;
+   }
+   printf("\n");
+}
+
+/****************************************/
+/* FREE_LIST.                           */
+/****************************************/
+void FREE_LIST(struct node *(*head), struct node *(*tail)) {
+struct node *current;
+   current = *head; 
+   while (current != NULL) {
+      current = current->right;
+      if (current != NULL) free(current->left);
+   }
+   free(*tail);
+   *head = NULL;
+   *tail = NULL;
+}
+
+/****************************************/
+/* FREE_TRASH.                          */
+/****************************************/
+void FREE_TRASH(struct trash *(*Head)) {
+struct trash *Current, *Previous;
+   Current = *Head; 
+   while (Current != NULL) {
+      Previous = Current;
+      Current = Current->next;
+      free(Previous);
+      Previous = NULL;
+   }
+   *Head = NULL;
+}
+
+/***********************************************************/
+/* Main.                                                   */
+/***********************************************************/
+int main(int argc, char *argv[]) {
+int number2Add;
+int number2Delete;
+struct node *head, *tail;
+struct trash *Head;
+   // Check command line input(s).
+   if (argc == 2) {
+      printf("Command line argument:\t %s\n", argv[1]);
+   } else if (argc > 2) {
+      printf("Too many arguments supplied.\n");
+      exit(0);
+   } else {
+      printf("One argument expected.\n");
+      exit(0);
+   }
+
+   // Build bi-directional linked list.
+   number2Add = atoi(argv[1]);
+   BUILD_LIST(number2Add, &head, &tail);
+
+   // Display bi-directional linked list contents.
+   DISPLAY_LIST_INORDER(head);
+   DISPLAY_LIST_POSTORDER(tail);
+	
+   // Randomly delete nodes.
+   number2Delete = rand() % number2Add + 3;
+   REMOVE_FROM_LIST(number2Delete, number2Add, &head, &tail, &Head);
+
+   // Display trash linked list contents.
+   DISPLAY_TRASH(Head);
+
+   // Display bi-directional linked list contents.
+   DISPLAY_LIST_INORDER(head);
+   DISPLAY_LIST_POSTORDER(tail);
+
+   // Free both linked lists.
+   FREE_LIST(&head, &tail);
+   FREE_TRASH(&Head);
+
+   return 0;
+}
+ 
+
+

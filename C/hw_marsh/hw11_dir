@@ -1,0 +1,82 @@
+HW-11	CS230		40 points	Due: April 24
+
+On this day in 1184 BC The Greeks entered Troy using 
+the Trojan Horse. Which has nothing to do with computer 
+science.
+
+
+For this assignment you will divide up HW-10 and develop a
+Makefile to practice using the compiler and linker with
+libraries. All files will be strictly C code - no C++!
+
+Part 1 (10 points):
+------------------
+Seperate HW-10 into the following 4 files:
+
+1) One file will contain all of the code/functions that 
+   build the doubly-linked linked list. 
+   Call it hw11-yourname-A.c
+   This file will also require a header file.
+   Call it hw11-yourname-A.h
+
+2) One file will contain all of the code/functions that 
+   build the garbage linked list. 
+   Call it hw11-yourname-B.c
+   This file will also require a header file.
+   Call it hw11-yourname-B.h
+
+3) One file will contain all of the code/functions that 
+   display the linked lists. 
+   Call it hw11-yourname-C.c
+   This file will also require a header file.
+   Call it hw11-yourname-C.h
+
+4) One file will contain all of the code/functions that 
+   free the linked lists. 
+   Call it hw11-yourname-D.c
+   This file will also require a header file.
+   Call it hw11-yourname-D.h
+
+Write a Makefile that compiles and links the above in 2 (two) 
+steps. You MUST call this Makefile "Makefile1".
+
+Part 2 (5 points):
+------------------
+Write a Makefile that creates a STATIC library/archive 
+(hw11-lib-yourname.a) out of the associated *.c files (1, 2, 
+3, & 4) and that compiles and links hw11-yourname-main.c 
+with your static library. You MUST call this Makefile "Makefile2".
+
+
+Part 3 (5 points):
+------------------
+Write a Makefile that creates SHARED a library 
+(hw11-lib-yourname.so) out of the associated c files (1, 2, 
+3, & 4) and that compiles and links hw11-yourname-main.c 
+with your shared library. You MUST call this Makefile "Makefile3".
+
+
+Part 4 (20 points):
+-------------------
+Modify hw11-yourname-main.c to use the SHARED library 
+(hw11-lib-yourname.so) dynamically (using dlopen). Call 
+this MAIN program hw11-yourname-4.c
+
+Write a Makefile that compiles and links hw11-yourname-4.c
+with your dynamic shared library. You MUST call this 
+Makefile "Makefile4".
+
+Note that all of the functionallity must exist in this program
+as it did in hw10 to earn full credit.
+
+REQUIREMENTS:
+-------------
+1. Your program must run in Streibel 115/109 or on shell.aero.und.edu.
+
+2. Your full name must appear as a comment at the beginning of each file
+   of your program.
+
+3. Your tarball must be named hw11-yourname.tar
+
+4. Email your source (subject hw11-yourname) to rmarsh@cs.und.edu 
+
